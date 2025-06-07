@@ -1,0 +1,12 @@
+fastapi
+fastapi[standard]
+uvicorn
+sqlalchemy
+psycopg2-binary
+pydantic
+pydantic-settings
+python-jose
+passlib
+python-dotenv
+python-multipart
+punq
