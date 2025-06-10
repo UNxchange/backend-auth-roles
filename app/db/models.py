@@ -14,5 +14,6 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
-    role = Column(Enum(UserRole), nullable=False, default=UserRole.estudiante)
+    # role = Column(Enum(UserRole), nullable=False, default=UserRole.estudiante)
+    role = Column(String, nullable=False, default=UserRole.estudiante.value)
     # Podríamos añadir más campos como: full_name, is_active, etc.
