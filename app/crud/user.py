@@ -21,15 +21,21 @@ def create_user(db: Session, user: schemas.UserCreate):
     Crea un nuevo usuario en la base de datos.
     Hashea la contraseña antes de guardarla.
     """
-    hashed_password = get_password_hash(user.password)
-    db_user = models.User(
-        email=user.email,
-        hashed_password=hashed_password,
-        role=user.role
-    )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
+    try:
+        hashed_password = get_password_hash(user.password)
+        db_user = models.User(
+            name=user.name,
+            email=user.email,
+            hashed_password=hashed_password,
+            role=user.role
+        )
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+    except Exception as e:
+        db.rollback()
+        print(f"Error creating user: {e}")
+        return None
     return db_user
 
 def authenticate_user(db: Session, email: str, password: str):
