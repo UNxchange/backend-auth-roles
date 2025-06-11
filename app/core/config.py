@@ -4,6 +4,14 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     DATABASE_URL: str
     SECRET_KEY: str
+
+    class Config:
+        env_file = ".env"
+    
+##Configuracion local de la base de datos, utilizar para pruebas si se necesita
+"""class Settings(BaseSettings):
+    DATABASE_URL: str
+    SECRET_KEY: str
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
@@ -13,7 +21,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     class Config:
-        env_file = ".env"
+        env_file = ".env"""
 
 settings = Settings()
 
