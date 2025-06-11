@@ -44,3 +44,9 @@ def authenticate_user(db: Session, email: str, password: str):
     if not verify_password(password, user.hashed_password):
         return None  # Contraseña incorrecta
     return user
+
+def get_all_users(db: Session):
+    """
+    Retorna todos los usuarios en la base de datos.
+    """
+    return db.query(models.User).all()

@@ -4,9 +4,11 @@ uvicorn
 sqlalchemy
 psycopg2-binary
 pydantic
+pydantic[email]
 pydantic-settings
 python-jose
 passlib
 python-dotenv
 python-multipart
 punq
+passlib[bcrypt]
