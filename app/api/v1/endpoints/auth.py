@@ -38,3 +38,11 @@ def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2Passw
 @router.get("/users/")
 def get_all_users(db: Session = Depends(get_db)):
     return crud_user.get_all_users(db)
+
+@router.get("/user", response_model=schemas.UserOut)
+def get_user_by_email(email: str, db: Session = Depends(get_db)):
+    db_user = crud_user.get_user_by_email(db, email=email)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return db_user
