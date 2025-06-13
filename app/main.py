@@ -4,6 +4,7 @@ from app.api.v1.endpoints import auth
 from app.db import models, database
 from fastapi.openapi.utils import get_openapi
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.middleware.cors import CORSMiddleware
 
 
 # Crea las tablas en la base de datos si no existen
@@ -24,6 +25,15 @@ app = FastAPI(
 # Incluye el router de autenticación con un prefijo
 # Todas las rutas en `auth.py` ahora comenzarán con /api/v1/auth
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Autenticación"])
+
+# Configuración CORS para permitir solicitudes desde el frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Endpoint de bienvenida o de health check
 @app.get("/", tags=["Root"])
