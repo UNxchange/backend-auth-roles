@@ -2,6 +2,9 @@
 from fastapi import FastAPI
 from app.api.v1.endpoints import auth
 from app.db import models, database
+from fastapi.openapi.utils import get_openapi
+from fastapi.security import OAuth2PasswordBearer
+
 
 # Crea las tablas en la base de datos si no existen
 # Esto es útil para el desarrollo, pero para producción se recomienda usar herramientas de migración como Alembic.
@@ -26,3 +29,29 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["Autenticación"])
 @app.get("/", tags=["Root"])
 def read_root():
     return {"status": "ok", "service": "unxchange-auth-service"}
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title="UnxChange - Servicio de Autenticación",
+        version="0.1.0",
+        description="API para gestionar usuarios, roles y autenticación.",
+        routes=app.routes,
+    )
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+        }
+    }
+    for path in openapi_schema["paths"]:
+        for method in openapi_schema["paths"][path]:
+            openapi_schema["paths"][path][method]["security"] = [{"BearerAuth": []}]
+    
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
