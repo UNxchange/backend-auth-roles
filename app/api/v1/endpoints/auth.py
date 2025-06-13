@@ -1,5 +1,5 @@
 # app/api/v1/endpoints/auth.py
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
@@ -9,6 +9,9 @@ from app.crud import user as crud_user
 from app.api.v1 import schemas
 from app.core import security
 from app.core.config import settings
+
+from app.core.security import get_current_user
+from app.db import models
 
 router = APIRouter()  # ✅ solo una vez
 
@@ -31,16 +34,23 @@ def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2Passw
         )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        data={"sub": user.email, "role": user.role.value}, expires_delta=access_token_expires
+        data={"sub": user.email, "role": user.role}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/users/")
-def get_all_users(db: Session = Depends(get_db)):
+def get_all_users(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)  # Aquí se protege
+):
     return crud_user.get_all_users(db)
 
 @router.get("/user", response_model=schemas.UserOut)
-def get_user_by_email(email: str, db: Session = Depends(get_db)):
+def get_user_by_email(
+    email: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)  # Protección con token
+):
     db_user = crud_user.get_user_by_email(db, email=email)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
