@@ -12,3 +12,4 @@ python-dotenv
 python-multipart
 punq
 passlib[bcrypt]
+gunicorn
