@@ -13,6 +13,9 @@ from app.core.config import settings
 from app.core.security import get_current_user
 from app.db import models
 
+# Importar el cliente de notificaciones
+from notification_client import send_welcome_email_async
+
 router = APIRouter()  # ✅ solo una vez
 
 @router.post("/register", response_model=schemas.UserOut)
@@ -21,7 +24,25 @@ def register_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    return crud_user.create_user(db=db, user=user_in)
+    # Crear el usuario en la base de datos
+    new_user = crud_user.create_user(db=db, user=user_in)
+    
+    # Verificar que el usuario se creó correctamente
+    if not new_user:
+        raise HTTPException(status_code=500, detail="Failed to create user")
+    
+    # Enviar notificación de bienvenida de forma asíncrona
+    try:
+        send_welcome_email_async(
+            user_name=new_user.name,
+            user_email=new_user.email
+        )
+        print(f"✅ Notificación de bienvenida enviada a {new_user.email}")
+    except Exception as e:
+        print(f"❌ Error enviando notificación de bienvenida: {e}")
+        # No fallar el registro si la notificación falla
+    
+    return new_user
 
 @router.post("/login", response_model=schemas.Token)
 def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
