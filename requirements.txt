@@ -13,3 +13,4 @@ punq==0.6.2
 bcrypt==4.1.2
 gunicorn==21.2.0
 requests==2.31.0
+prometheus_client
