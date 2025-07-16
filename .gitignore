@@ -135,6 +135,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+venv_new/
+.venv_new
 
 # Spyder project settings
 .spyderproject
@@ -196,3 +198,4 @@ cython_debug/
 .vscode
 
 index.html
+
