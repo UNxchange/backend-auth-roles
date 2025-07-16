@@ -1,40 +1,31 @@
-# docker-compose.yml
 version: '3.8'
 
 services:
-  # Servicio de la Base de Datos PostgreSQL
-  db:
-    image: postgres:13-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    # Lee las variables directamente del archivo .env en la raíz
-    env_file:
-      - .env
-    # Las variables de entorno para el contenedor de postgres son las que hemos definido
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    ports:
-      - "5432:5432"
-
-  # Servicio de la API de Autenticación
-  auth-api:
+  backend:
     build: .
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-    volumes:
-      - ./app:/usr/src/app/app
+    container_name: fastapi_app
     ports:
       - "8000:8000"
-    # Lee el .env para obtener las variables
-    env_file:
-      - .env
-    environment:
-      # Sobreescribe la DATABASE_URL para que apunte al contenedor 'db'
-      # Docker Compose resuelve 'db' a la IP interna del contenedor de la base de datos
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
-    depends_on:
-      - db
+    networks:
+      - observability
 
-volumes:
-  postgres_data:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - observability
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - observability
+
+networks:
+  observability:

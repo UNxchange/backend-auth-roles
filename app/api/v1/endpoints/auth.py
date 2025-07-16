@@ -20,6 +20,13 @@ router = APIRouter()  # ✅ solo una vez
 
 @router.post("/register", response_model=schemas.UserOut)
 def register_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
+    # Validar que el correo tenga el dominio @unal.edu.co
+    if not user_in.email.lower().endswith("@unal.edu.co"):
+        raise HTTPException(
+            status_code=400,
+            detail="Solo se permiten correos con dominio @unal.edu.co"
+        )
+
     db_user = crud_user.get_user_by_email(db, email=user_in.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -37,9 +44,9 @@ def register_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
             user_name=new_user.name,
             user_email=new_user.email
         )
-        print(f"✅ Notificación de bienvenida enviada a {new_user.email}")
+        print(f"Notificación de bienvenida enviada a {new_user.email}")
     except Exception as e:
-        print(f"❌ Error enviando notificación de bienvenida: {e}")
+        print(f"Error enviando notificación de bienvenida: {e}")
         # No fallar el registro si la notificación falla
     
     return new_user
