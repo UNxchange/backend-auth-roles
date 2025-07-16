@@ -18,7 +18,7 @@ class UserOut(BaseModel):
     role: UserRole
 
     class Config:
-        orm_mode = True # Permite que Pydantic lea datos desde modelos ORM
+        from_attributes = True  # Permite que Pydantic lea datos desde modelos ORM
 
 # Schema para el token JWT
 class Token(BaseModel):

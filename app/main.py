@@ -6,6 +6,9 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
 
+#metrics
+from app.metrics.prometheus import prometheus_middleware, prometheus_metrics
+
 
 # Crea las tablas en la base de datos si no existen
 # Esto es útil para el desarrollo, pero para producción se recomienda usar herramientas de migración como Alembic.
@@ -21,6 +24,10 @@ app = FastAPI(
     description="API para gestionar usuarios, roles y autenticación.",
     version="0.1.0"
 )
+
+# Agregar el middleware
+app.middleware("http")(prometheus_middleware)
+
 
 # Incluye el router de autenticación con un prefijo
 # Todas las rutas en `auth.py` ahora comenzarán con /api/v1/auth
@@ -65,3 +72,9 @@ def custom_openapi():
     return app.openapi_schema
 
 app.openapi = custom_openapi
+
+
+# Endpoint para Prometheus
+@app.get("/metrics")
+def metrics():
+    return prometheus_metrics()
