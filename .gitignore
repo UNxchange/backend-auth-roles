@@ -200,3 +200,4 @@ cython_debug/
 
 index.html
 
+backend_auth.db
