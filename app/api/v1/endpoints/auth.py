@@ -41,12 +41,14 @@ def register_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     # Enviar notificación de bienvenida de forma asíncrona
     try:
         send_welcome_email_async(
+            user_id=new_user.id,  # Pasar el ID real del usuario
             user_name=new_user.name,
-            user_email=new_user.email
+            user_email=new_user.email,
+            user_role=new_user.role  # Pasar el rol del usuario
         )
-        print(f"Notificación de bienvenida enviada a {new_user.email}")
+        print(f"✅ Notificación de bienvenida enviada para usuario ID {new_user.id}: {new_user.email}")
     except Exception as e:
-        print(f"Error enviando notificación de bienvenida: {e}")
+        print(f"⚠️ Error enviando notificación de bienvenida: {e}")
         # No fallar el registro si la notificación falla
     
     return new_user
