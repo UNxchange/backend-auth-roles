@@ -36,15 +36,11 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["Autenticación"])
 # Configuración CORS para permitir solicitudes desde el frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost",
-        "http://localhost:80",
-        "http://localhost:3000",
-        "http://localhost:8080",
-    ],  # Orígenes específicos en lugar de "*"
-    allow_credentials=True,  # Permitir credenciales
+    allow_origins=["*"],  # Permitir todos los orígenes en desarrollo
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Endpoint de bienvenida o de health check
