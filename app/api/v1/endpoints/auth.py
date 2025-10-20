@@ -13,8 +13,8 @@ from app.core.config import settings
 from app.core.security import get_current_user
 from app.db import models
 
-# Importar el cliente de notificaciones
-from notification_client import send_welcome_email_async
+# Importar el broker de mensajes
+from app.broker import get_message_broker
 
 router = APIRouter()  # ✅ solo una vez
 
@@ -38,18 +38,22 @@ def register_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     if not new_user:
         raise HTTPException(status_code=500, detail="Failed to create user")
     
-    # Enviar notificación de bienvenida de forma asíncrona
+    # Publicar evento de usuario creado al broker
     try:
-        send_welcome_email_async(
-            user_id=new_user.id,  # Pasar el ID real del usuario
+        broker = get_message_broker()
+        success = broker.publish_user_created(
+            user_id=new_user.id,
             user_name=new_user.name,
             user_email=new_user.email,
-            user_role=new_user.role  # Pasar el rol del usuario
+            user_role=new_user.role
         )
-        print(f"✅ Notificación de bienvenida enviada para usuario ID {new_user.id}: {new_user.email}")
+        if success:
+            print(f"✅ Evento de creación publicado para usuario ID {new_user.id}: {new_user.email}")
+        else:
+            print(f"⚠️ No se pudo publicar el evento de creación para usuario {new_user.email}")
     except Exception as e:
-        print(f"⚠️ Error enviando notificación de bienvenida: {e}")
-        # No fallar el registro si la notificación falla
+        print(f"⚠️ Error publicando evento de creación: {e}")
+        # No fallar el registro si no se puede publicar el evento
     
     return new_user
 
